@@ -13,7 +13,6 @@ const Profile = () => {
     bio: user.bio || ''
   });
   const [message, setMessage] = useState({ text: '', type: '' });
-  const [aiLoading, setAiLoading] = useState(false);
   
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -41,32 +40,6 @@ const Profile = () => {
       setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     } catch (err) {
       setMessage({ text: err.response?.data?.message || 'Error updating profile', type: 'error' });
-    }
-  };
-
-  const generateBio = async () => {
-    if (!formData.skillsOffered && !formData.skillsWanted) {
-        alert("Please add some skills first so I can write a relevant bio!");
-        return;
-    }
-    
-    setAiLoading(true);
-    try {
-        const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        const { data } = await axios.post('http://localhost:5000/api/ai/generate-bio', {
-            name: formData.name,
-            skillsOffered: formData.skillsOffered.split(',').map(s => s.trim()).filter(Boolean),
-            skillsWanted: formData.skillsWanted.split(',').map(s => s.trim()).filter(Boolean)
-        }, config);
-        
-        setFormData({ ...formData, bio: data.bio });
-        setMessage({ text: 'AI Bio generated! Check it out below.', type: 'success' });
-        setTimeout(() => setMessage({ text: '', type: '' }), 3000);
-    } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || "Failed to generate bio.");
-    } finally {
-        setAiLoading(false);
     }
   };
 
@@ -111,16 +84,6 @@ const Profile = () => {
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <label style={{ margin: 0 }}>Bio</label>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
-                  style={{ fontSize: '0.75rem', padding: '0.3rem 0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                  onClick={generateBio}
-                  disabled={aiLoading}
-                >
-                  {aiLoading ? <Loader2 className="animate-spin" size={12} /> : <Sparkles size={12} />}
-                  Magic Bio ✨
-                </button>
             </div>
             <textarea className="form-control" name="bio" rows="4" value={formData.bio} onChange={handleChange} placeholder="Tell us more about yourself..."></textarea>
           </div>

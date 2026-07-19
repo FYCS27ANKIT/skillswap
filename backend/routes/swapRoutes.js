@@ -7,9 +7,6 @@ const { protect } = require('../middleware/authMiddleware');
 router.post('/', protect, async (req, res) => {
   try {
     const { receiverId, offeredSkill, wantedSkill, message } = req.body;
-    
-    console.log("POST /api/swaps req.body:", req.body);
-    console.log("SENDER:", req.user._id, "RECEIVER:", receiverId);
 
     // Check if swap request already exists
     const existingReq = await SwapRequest.findOne({

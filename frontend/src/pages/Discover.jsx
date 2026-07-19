@@ -66,7 +66,7 @@ const Discover = () => {
             {user.skillsOffered.some(skill => u.skillsWanted.includes(skill)) && 
              u.skillsOffered.some(skill => user.skillsWanted.includes(skill)) ? (
                 <div style={{ marginBottom: '1rem', color: 'var(--success)', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                  ✨ Perfect Match!
+                   Perfect Match!
                 </div>
             ) : null}
 

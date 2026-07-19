@@ -92,10 +92,6 @@ const PublicProfile = () => {
     }
   };
 
-  const handleMessage = () => {
-    navigate('/messages');
-  };
-
   if (loading) return <div className="container" style={{ textAlign: 'center', marginTop: '4rem' }}>Loading...</div>;
   if (!profile) return <div className="container" style={{ textAlign: 'center', marginTop: '4rem' }}>User not found.</div>;
 
@@ -130,7 +126,7 @@ const PublicProfile = () => {
                   )}
                 </div>
              ) : connectionStatus === 'accepted' ? (
-                <button className="btn btn-success" onClick={handleMessage}>
+                <button className="btn btn-success">
                    <MessageCircle size={18} /> Message
                 </button>
              ) : null}

@@ -25,8 +25,8 @@ const Navbar = () => {
           <>
             <Link to="/discover"><BookOpen size={18} /> Discover</Link>
             <Link to="/requests">Requests</Link>
-            <Link to="/messages"><MessageCircle size={18} /> Messages</Link>
             <Link to="/profile"><UserIcon size={18} /> Profile</Link>
+            <Link to="/chat">< MessageCircle size={18} /> Chat</Link>
             <button className="btn btn-secondary" onClick={handleLogout} style={{ padding: '0.4rem 0.8rem' }}>
               <LogOut size={16} /> Logout
             </button>

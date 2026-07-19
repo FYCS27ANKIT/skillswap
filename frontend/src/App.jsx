@@ -9,7 +9,7 @@ import Discover from './pages/Discover';
 import Profile from './pages/Profile';
 import PublicProfile from './pages/PublicProfile';
 import SwapRequests from './pages/SwapRequests';
-import Messages from './pages/Messages';
+import Chat from './pages/Chat';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = React.useContext(AuthContext);
@@ -28,10 +28,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/discover" element={<PrivateRoute><Discover /></PrivateRoute>} />
+            <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/profile/:id" element={<PrivateRoute><PublicProfile /></PrivateRoute>} />
             <Route path="/requests" element={<PrivateRoute><SwapRequests /></PrivateRoute>} />
-            <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
           </Routes>
         </main>
       </AuthProvider>
