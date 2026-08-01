@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { buildApiUrl } from '../api';
 import { Sparkles, Loader2 } from 'lucide-react';
 
 const Profile = () => {
@@ -32,7 +31,7 @@ const Profile = () => {
         skillsWanted: formData.skillsWanted.split(',').map(s => s.trim()).filter(Boolean)
       };
 
-      const { data } = await axios.put(buildApiUrl('/api/users/profile'), formattedData, config);
+      const { data } = await axios.put('http://localhost:5000/api/users/profile', formattedData, config);
       const updatedUser = { ...user, ...data };
       setUser(updatedUser);
       localStorage.setItem('userInfo', JSON.stringify(updatedUser));

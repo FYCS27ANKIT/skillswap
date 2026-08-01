@@ -5,16 +5,6 @@ const connectDB = require('./db');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const normalizeOrigin = (value) => value ? value.replace(/\/$/, '') : '';
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  process.env.FRONTEND_URL,
-  'http://localhost:5173',
-  'https://fycs27ankit.github.io',
-  'https://fycs27ankit.github.io/skillswap',
-  'https://skillswap-api-5mc2.onrender.com'
-].map(normalizeOrigin).filter(Boolean);
-
 // Connect to Database
 connectDB();
 
@@ -22,7 +12,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: ['http://localhost:5173', 'https://fycs27ankit.github.io'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -33,18 +23,13 @@ const connectedUserSockets = new Map();
 
 // Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    const normalizedOrigin = normalizeOrigin(origin);
-    if (!origin || allowedOrigins.includes(normalizedOrigin)) {
-      callback(null, true);
-      return;
-    }
-
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: [
+    'http://localhost:5173',
+    'https://fycs27ankit.github.io'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 

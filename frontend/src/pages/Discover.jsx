@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { buildApiUrl } from '../api';
 import { Link } from 'react-router-dom';
 import { User as UserIcon } from 'lucide-react';
 
@@ -18,7 +17,7 @@ const Discover = () => {
         const config = {
           headers: { Authorization: `Bearer ${user.token}` }
         };
-        const { data } = await axios.get(buildApiUrl('/api/users'), config);
+        const { data } = await axios.get('http://localhost:5000/api/users', config);
         setUsers(data);
       } catch (err) {
         setError('Failed to fetch users');

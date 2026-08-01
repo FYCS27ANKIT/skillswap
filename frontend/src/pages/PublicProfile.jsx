@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { buildApiUrl } from '../api';
 import { ArrowLeft, UserPlus, Check, Clock, MessageCircle } from 'lucide-react';
 
 const PublicProfile = () => {
@@ -29,11 +28,11 @@ const PublicProfile = () => {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
         
         // Fetch user data
-        const { data: userData } = await axios.get(buildApiUrl(`/api/users/${id}`), config);
+        const { data: userData } = await axios.get(`http://localhost:5000/api/users/${id}`, config);
         setProfile(userData);
 
         // Fetch connection status
-        const { data: statusData } = await axios.get(buildApiUrl(`/api/swaps/status/${id}`), config);
+        const { data: statusData } = await axios.get(`http://localhost:5000/api/swaps/status/${id}`, config);
         setConnectionStatus(statusData.status);
         setIsSender(statusData.isSender);
         setConnectionRequestId(statusData.requestId);
@@ -58,7 +57,7 @@ const PublicProfile = () => {
         wantedSkill: profile.skillsOffered[0] || 'Your Skill',
         message: `Hi, I'd like to connect and swap skills!`
       };
-      const { data } = await axios.post(buildApiUrl('/api/swaps'), payload, config);
+      const { data } = await axios.post('http://localhost:5000/api/swaps', payload, config);
       setConnectionStatus('pending');
       setIsSender(true);
       setConnectionRequestId(data._id);
@@ -66,7 +65,7 @@ const PublicProfile = () => {
       console.error("Connect error:", err);
       if (err.response && err.response.status === 400) {
          try {
-           const { data: statusData } = await axios.get(buildApiUrl(`/api/swaps/status/${profile._id}`), config);
+           const { data: statusData } = await axios.get(`http://localhost:5000/api/swaps/status/${profile._id}`, config);
            setConnectionStatus(statusData.status);
            setIsSender(statusData.isSender);
          } catch (e) {}
@@ -81,7 +80,7 @@ const PublicProfile = () => {
     setActionLoading(true);
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      await axios.delete(buildApiUrl(`/api/swaps/${connectionRequestId}`), config);
+      await axios.delete(`http://localhost:5000/api/swaps/${connectionRequestId}`, config);
       setConnectionStatus('none');
       setIsSender(false);
       setConnectionRequestId(null);
