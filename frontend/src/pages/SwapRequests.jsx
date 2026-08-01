@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { buildApiUrl } from '../api';
 import { Check, X } from 'lucide-react';
 
 const SwapRequests = () => {
@@ -14,7 +15,7 @@ const SwapRequests = () => {
   const fetchRequests = async () => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      const { data } = await axios.get('http://localhost:5000/api/swaps', config);
+      const { data } = await axios.get(buildApiUrl('/api/swaps'), config);
       setIncoming(data.incoming);
       setOutgoing(data.outgoing);
     } catch (err) {
@@ -31,7 +32,7 @@ const SwapRequests = () => {
   const handleUpdateStatus = async (id, status) => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      await axios.put(`http://localhost:5000/api/swaps/${id}/status`, { status }, config);
+      await axios.put(buildApiUrl(`/api/swaps/${id}/status`), { status }, config);
       fetchRequests(); // Refresh the lists
     } catch (err) {
       setError('Failed to update request');
@@ -41,7 +42,7 @@ const SwapRequests = () => {
   const handleCancel = async (id) => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      await axios.delete(`http://localhost:5000/api/swaps/${id}`, config);
+      await axios.delete(buildApiUrl(`/api/swaps/${id}`), config);
       fetchRequests(); // Refresh the lists
     } catch (err) {
       setError('Failed to cancel request');

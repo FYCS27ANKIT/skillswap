@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { AuthContext } from '../context/AuthContext';
+import { buildApiUrl } from '../api';
 import { Paperclip, Phone, Send, Smile, Video, Search, MoreVertical } from 'lucide-react';
 
 
@@ -32,7 +33,7 @@ const Chat = () => {
 
     const fetchConnections = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/messages/connections', config);
+        const { data } = await axios.get(buildApiUrl('/api/messages/connections'), config);
         setConnections(data);
         if (!activeConversationId && data[0]) {
           setActiveConversationId(data[0].conversationId);
@@ -45,7 +46,7 @@ const Chat = () => {
     fetchConnections();
 
     if (!socketRef.current) {
-      socketRef.current = io('http://localhost:5000', {
+      socketRef.current = io(buildApiUrl(''), {
         transports: ['websocket'],
         reconnectionAttempts: 5,
       });
@@ -84,7 +85,7 @@ const Chat = () => {
       if (!isMine) {
         const refreshConnections = async () => {
           try {
-            const { data } = await axios.get('http://localhost:5000/api/messages/connections', {
+            const { data } = await axios.get(buildApiUrl('/api/messages/connections'), {
               headers: { Authorization: `Bearer ${user.token}` },
             });
             setConnections(data);
@@ -121,7 +122,7 @@ const Chat = () => {
 
     const fetchMessages = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/messages/${activeConversationId}`, config);
+        const { data } = await axios.get(buildApiUrl(`/api/messages/${activeConversationId}`), config);
         setMessages(data);
       } catch (error) {
         console.error('Failed to load messages', error);
@@ -147,7 +148,7 @@ const Chat = () => {
 
     const loadInitialConversation = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/messages/connections', config);
+        const { data } = await axios.get(buildApiUrl('/api/messages/connections'), config);
         setConnections(data);
         if (data[0]) {
           setActiveConversationId(data[0].conversationId);
@@ -192,7 +193,7 @@ const Chat = () => {
     };
 
     try {
-      const { data: savedMessage } = await axios.post('http://localhost:5000/api/messages', payload, {
+      const { data: savedMessage } = await axios.post(buildApiUrl('/api/messages'), payload, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       const normalizedMessage = {
