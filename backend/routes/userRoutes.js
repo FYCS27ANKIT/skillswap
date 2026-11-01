@@ -1,13 +1,48 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Review = require('../models/Review');
 const { protect } = require('../middleware/authMiddleware');
+
+// Helper to compute average rating and review count for an array of user objects
+const attachReviewStats = async (users) => {
+  const userIds = users.map(u => u._id);
+  const stats = await Review.aggregate([
+    { $match: { reviewee: { $in: userIds } } },
+    {
+      $group: {
+        _id: '$reviewee',
+        avgRating: { $avg: '$rating' },
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const statsMap = new Map();
+  stats.forEach(s => {
+    statsMap.set(s._id.toString(), {
+      averageRating: Number(s.avgRating.toFixed(1)),
+      reviewCount: s.count,
+    });
+  });
+
+  return users.map(u => {
+    const userObj = u.toObject ? u.toObject() : u;
+    const stat = statsMap.get(userObj._id.toString()) || { averageRating: 0, reviewCount: 0 };
+    return {
+      ...userObj,
+      averageRating: stat.averageRating,
+      reviewCount: stat.reviewCount,
+    };
+  });
+};
 
 // Get all users (for Discover page)
 router.get('/', protect, async (req, res) => {
   try {
     const users = await User.find({ _id: { $ne: req.user._id } }).select('-password');
-    res.json(users);
+    const enrichedUsers = await attachReviewStats(users);
+    res.json(enrichedUsers);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -18,7 +53,8 @@ router.get('/profile', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
     if (user) {
-      res.json(user);
+      const [enriched] = await attachReviewStats([user]);
+      res.json(enriched);
     } else {
       res.status(404).json({ message: 'User not found' });
     }
@@ -39,17 +75,21 @@ router.put('/profile', protect, async (req, res) => {
       if (req.body.bio !== undefined) user.bio = req.body.bio;
       
       if (req.body.password) {
-          user.password = req.body.password;
+        user.password = req.body.password;
       }
       
       const updatedUser = await user.save();
+      const [enriched] = await attachReviewStats([updatedUser]);
       res.json({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        skillsOffered: updatedUser.skillsOffered,
-        skillsWanted: updatedUser.skillsWanted,
-        bio: updatedUser.bio
+        _id: enriched._id,
+        name: enriched.name,
+        email: enriched.email,
+        skillsOffered: enriched.skillsOffered,
+        skillsWanted: enriched.skillsWanted,
+        bio: enriched.bio,
+        skillCredits: enriched.skillCredits ?? 3,
+        averageRating: enriched.averageRating,
+        reviewCount: enriched.reviewCount,
       });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -64,7 +104,8 @@ router.get('/:id', protect, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     if (user) {
-      res.json(user);
+      const [enriched] = await attachReviewStats([user]);
+      res.json(enriched);
     } else {
       res.status(404).json({ message: 'User not found' });
     }

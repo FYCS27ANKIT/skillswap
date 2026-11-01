@@ -52,6 +52,11 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/swaps', require('./routes/swapRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/sessions', require('./routes/sessionRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
+app.use('/api/credits', require('./routes/creditRoutes'));
+app.use('/api/workshops', require('./routes/workshopRoutes'));
 
 io.on('connection', (socket) => {
   socket.on('authenticate', ({ user }) => {
@@ -81,6 +86,48 @@ io.on('connection', (socket) => {
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('new-message', payload);
     }
+  });
+
+  socket.on('notify-user', ({ targetUserId, type, data }) => {
+    const targetSocketId = connectedUserSockets.get(targetUserId?.toString());
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('notification', { type, data, timestamp: new Date() });
+    }
+  });
+
+  // Collaborative Live Workspace (Code Sandbox & Digital Whiteboard)
+  socket.on('join-workspace', ({ roomId, user }) => {
+    if (!roomId) return;
+    const roomName = `workspace_${roomId}`;
+    socket.join(roomName);
+    socket.to(roomName).emit('workspace-user-joined', {
+      user: user ? { id: user._id || user.id, name: user.name, email: user.email } : { id: socket.id, name: 'Partner' },
+      timestamp: new Date(),
+    });
+  });
+
+  socket.on('leave-workspace', ({ roomId, user }) => {
+    if (!roomId) return;
+    const roomName = `workspace_${roomId}`;
+    socket.leave(roomName);
+    socket.to(roomName).emit('workspace-user-left', {
+      user: user ? { id: user._id || user.id, name: user.name } : null,
+    });
+  });
+
+  socket.on('workspace-code-update', ({ roomId, code, language, sender }) => {
+    if (!roomId) return;
+    socket.to(`workspace_${roomId}`).emit('workspace-code-sync', { code, language, sender });
+  });
+
+  socket.on('workspace-draw-update', ({ roomId, stroke, sender }) => {
+    if (!roomId) return;
+    socket.to(`workspace_${roomId}`).emit('workspace-draw-sync', { stroke, sender });
+  });
+
+  socket.on('workspace-clear-canvas', ({ roomId, sender }) => {
+    if (!roomId) return;
+    socket.to(`workspace_${roomId}`).emit('workspace-clear-sync', { sender });
   });
 
   socket.on('disconnect', () => {

@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
     default: '',
+  },
+  skillCredits: {
+    type: Number,
+    default: 3,
+    min: 0,
   }
 }, { timestamps: true });
 
